@@ -38,6 +38,8 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="binary_option_structured.cpp" />
+		<Unit filename="f_binary.cpp" />
+		<Unit filename="f_binary.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
