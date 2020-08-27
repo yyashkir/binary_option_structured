@@ -1,0 +1,16 @@
+Cash payoff::100
+Asset spot_price::100
+Strike K or K1;K2::85;95
+Option type::call,put
+Cash or asset_payoff::cash,asset
+Interest rate::0.05
+Dividend rate::0.02
+Volatility::0.12
+Maturity::1.2
+Time step::0.013
+Confidence level::0.95
+Output::binary_option_out.csv
+Image processor::gnuplot,wgnuplot
+Image viewer::eog,mspaint
+Text viewer::eog,notepad
+Report::report.res
