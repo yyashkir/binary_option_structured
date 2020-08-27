@@ -1,12 +1,24 @@
 #pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <math.h>
+#include <string>
+#include <sstream>
+#include <cstdio>
+#include <ctime>
+
 #include <armadillo>
 
 using namespace std;
 
-
 struct parameter_types
 {
-    string delimiter = "::";
+    string arg_file_name;
+    string arg_delim = "::";
+    string delimiter = "\t";
     double cash_payoff;
     double spot_price;
     string strikes;
@@ -30,6 +42,7 @@ struct parameter_types
     string image_processor;
     string image_viewer;
     string text_viewer;
+    string report;
 } ;
 
 struct variable_types
@@ -68,3 +81,5 @@ vector<string> split_string(string a_string, string delimiter);
 arma::vec split_string_to_doubles(string s, string delimiter);
 
 void show_result(string editor, string file);
+
+string read_file(string file);

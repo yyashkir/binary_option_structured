@@ -7,69 +7,71 @@ using namespace std;
 parameter_types read_input(string argument, parameter_types par)
 {
     string line;
+    string arg_delimiter = par.arg_delim;
+
     ifstream infile(argument);
 
-    string delimiter = par.delimiter;
-
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.cash_payoff = atof(line.c_str());
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.spot_price = atof(line.c_str());
 
     getline(infile,line);
-    par.strikes = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.strikes = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     getline(infile,line);
-    par.option_type = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.option_type = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     getline(infile,line);
-    par.cash_or_asset_payoff = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.cash_or_asset_payoff = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.interest_rate = atof(line.c_str());
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.dividend_rate = atof(line.c_str());
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.volatility = atof(line.c_str());
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.maturity = atof(line.c_str());
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.time_step = atof(line.c_str());
 
     getline(infile,line);
-    line = line.substr(line.find(delimiter)+delimiter.length()) ;
+    line = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
     par.confidence_level = atof(line.c_str());
 
     getline(infile,line);
-    par.output = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.output = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     getline(infile,line);
-    par.image_processor = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.image_processor = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     getline(infile,line);
-    par.image_viewer = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.image_viewer = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     getline(infile,line);
-    par.text_viewer = line.substr(line.find(delimiter)+delimiter.length()) ;
+    par.text_viewer = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
+
+    getline(infile,line);
+    par.report = line.substr(line.find(arg_delimiter)+arg_delimiter.length()) ;
 
     return par;
 }
 
 parameter_types setting_parameters(parameter_types par)
 {
-
     double r = par.interest_rate;
     double q = par.dividend_rate;
 
@@ -87,10 +89,20 @@ parameter_types setting_parameters(parameter_types par)
     par.pm = 1. -  par.pu -  par.pd;
 
     par.K1K2.set_size(2);
-    par.K1K2 = split_string_to_doubles(par.strikes, ";");    // s must be either K1 (single) or K1_K2 (double)
-    par.strike_type = "single";
-    if(par.K1K2.n_elem == 2)
-         par.strike_type = "double";
+    par.K1K2.fill(0);
+
+    auto y = split_string_to_doubles(par.strikes, ";");
+    if(y.size() == 1)
+    {
+        par.K1K2(0) = y(0);
+        par.strike_type = "single";
+    }
+    else
+    {
+        par.K1K2(0) = y(0);
+        par.K1K2(1) = y(1);
+        par.strike_type = "double";
+    }
 
     return par;
 }
@@ -100,23 +112,22 @@ variable_types setting_variables(variable_types var, parameter_types par)
     int n = par.numb_tsteps;
 
     var.pji.set_size(n, 2*n-1);
-    var.pji.fill(0.123);
+    var.pji.fill(0);
 
     var.sji.set_size(n, 2*n-1);
-    var.sji.fill(0.456);
+    var.sji.fill(0);
 
     var.vji.set_size(n, 2*n-1);
-    var.vji.fill(0.789);
+    var.vji.fill(0);
 
     var.ap.set_size(n, 2*n-1);
-    var.ap.fill(0.1011);
+    var.ap.fill(0);
 
     var.ee_pfe.set_size(n,4);
-    var.ee_pfe.fill(0.1213);
+    var.ee_pfe.fill(0);
 
     return var;
 }
-
 
 variable_types trinomial_tree(variable_types var, parameter_types par)
 {
@@ -175,8 +186,8 @@ double cdf(double x)
 	return cnd;
 }
 
-double BS_binary(int eta, double S, double K, double r, double q, double sigma, double tau,
-                    parameter_types par)
+double BS_binary(int eta, double S, double K, double r, double q,
+                    double sigma, double tau, parameter_types par)
 {
     double d1, d2, v = 0;
 
@@ -212,7 +223,7 @@ variable_types option_node_values(variable_types var, parameter_types par)
     double r = par.interest_rate;
     double q = par.dividend_rate;
     double vol = par.volatility;
-
+//cout<<endl<<par.K1K2;//<<" "<<K1;//<<" "<<K2;exit(0);
     for (j = 0; j < n; j++)
     {
         tau = (n - j - 1) * dt;
@@ -225,7 +236,6 @@ variable_types option_node_values(variable_types var, parameter_types par)
                                - eta * BS_binary(eta, var.sji(j,i), K2, r, q, vol, tau, par);
         }
     }
-
     return var;
 }
 
@@ -307,16 +317,17 @@ void plot_chart(parameter_types par, int cols, string xlabel, string ylabel, str
                 string linesorpoints)
 {
     int k;
+    string sep = par.delimiter;
 	stringstream plot_string;
 	string show_string;
 	string data_file = par.output;
 
 	string plot;
 	string pngfile = data_file + ".png";
-//	string image_processor = "gnuplot";
-//    string image_viewer = "eog";
 
-    plot_string << "set terminal png;"
+    plot_string
+        << "set datafile separator '" <<sep<<"';"
+        << endl <<"set terminal png;"
         << endl << "set output " << "'" << pngfile << "';"
         << endl << "set grid;"
         << endl << "set key autotitle columnhead;"
@@ -336,6 +347,9 @@ void plot_chart(parameter_types par, int cols, string xlabel, string ylabel, str
 
     string command = par.image_processor + " plotcommand";
     const char *make_graph = command.c_str();
+
+
+
     int ret = system(make_graph);
     if (ret == 0)
     {
@@ -356,16 +370,41 @@ void save_ee_pfe(variable_types var, parameter_types par)
 {
     int j;
     int n = par.numb_tsteps;
+    string sep = par.delimiter;
+
+    ofstream rep(par.report);
+    string report_text = "                Command parameters:\n";
+    report_text += read_file(par.arg_file_name);
+    rep << report_text;
+
     ofstream myfile;
     myfile.open (par.output);
-    myfile << "time pfe-dn ee pfe-up";
+    myfile << "time"+sep+"pfe-dn"+sep+"ee"+sep+"pfe-up";
+    rep <<    "time"+sep+"pfe-dn"+sep+"ee"+sep+"pfe-up";
     for(j=0; j<n; j++)
-        myfile<<endl<<var.ee_pfe(j,0)<<" "<< var.ee_pfe(j,1)<<" "<< var.ee_pfe(j,2)<<" "<< var.ee_pfe(j,3);
+    {
+        myfile <<endl<<var.ee_pfe(j,0)<<sep<< var.ee_pfe(j,1)<<sep<< var.ee_pfe(j,2)<<sep<< var.ee_pfe(j,3);
+        rep <<   endl<<var.ee_pfe(j,0)<<sep<< var.ee_pfe(j,1)<<sep<< var.ee_pfe(j,2)<<sep<< var.ee_pfe(j,3);
+    }
     myfile.close();
 
+    plot_chart(par, 4, "Time(y)", "Option price", "Binary Option ("+par.strike_type+" strike) pfe envelop ", "linespoints pt 7 lw 1");
 
-    plot_chart(par, 4, "years", "price", "title", "linespoints pt 7 lw 1");
+    rep.close();
+}
 
+string read_file(string file)
+{
+    string line;
+    string full_text = "";
+    ifstream rf(file);
+    do
+    {
+        getline(rf, line);
+        full_text += line + "\n";
+    }while(!rf.eof());
+
+    return full_text;
 }
 
 void show_result(string editor, string file)

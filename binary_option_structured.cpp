@@ -3,15 +3,16 @@
 
 using namespace std;
 
-
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     cout << "Hello structured!" << endl;
 
     parameter_types par;
     variable_types var;
 
-    par = read_input(string(argv[1]), par);
+    par.arg_file_name = argv[1];
+
+    par = read_input(par.arg_file_name, par);
 
     par = setting_parameters(par);
 
@@ -25,7 +26,7 @@ int main(int argc, char **argv)
 
     save_ee_pfe(var, par);
 
-    show_result(par.text_viewer, par.output);
+    show_result(par.text_viewer, par.report);
 
     return 0;
 }

@@ -37,6 +37,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add library="armadillo" />
+		</Linker>
 		<Unit filename="binary_option_structured.cpp" />
 		<Unit filename="f_binary.cpp" />
 		<Unit filename="f_binary.h" />

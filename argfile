@@ -1,6 +1,6 @@
 Cash payoff::100
 Asset spot_price::100
-Strike K or K1/K2::85;95
+Strike K or K1;K2::85;95
 Option type::put
 Cash or asset_payoff::cash
 Interest rate::0.05
@@ -13,3 +13,4 @@ Output::binary_option_out.csv
 Image processor::gnuplot
 Image viewer::eog
 Text viewer::gedit
+Report::report.res
